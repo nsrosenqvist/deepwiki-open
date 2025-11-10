@@ -393,12 +393,20 @@ def generate_json_export(repo_url: str, pages: List[WikiPage]) -> str:
 # Import the simplified chat implementation
 from api.simple_chat import chat_completions_stream
 from api.websocket_wiki import handle_websocket_chat
+# MCP adapter router
+from api.mcp_server import router as mcp_router
 
 # Add the chat_completions_stream endpoint to the main app
 app.add_api_route("/chat/completions/stream", chat_completions_stream, methods=["POST"])
 
 # Add the WebSocket endpoint
 app.add_websocket_route("/ws/chat", handle_websocket_chat)
+
+# Mount MCP router for LLM integrations
+app.include_router(mcp_router, prefix="/mcp")
+
+# Also mount SSE endpoint at root level for legacy support
+app.include_router(mcp_router, prefix="/sse", tags=["SSE (Legacy)"])
 
 # --- Wiki Cache Helper Functions ---
 
